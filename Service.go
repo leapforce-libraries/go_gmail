@@ -1,4 +1,4 @@
-package googledatastudio
+package gmail
 
 import (
 	"fmt"

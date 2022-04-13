@@ -1,4 +1,4 @@
-package googledatastudio
+package gmail
 
 import (
 	"fmt"
@@ -17,7 +17,7 @@ type Message struct {
 	InternalDate *string      `json:"internalDate,omitempty"`
 	Payload      *MessagePart `json:"payload,omitempty"`
 	SizeEstimate *int64       `json:"sizeEstimate,omitempty"`
-	Raw          *int64       `json:"raw,omitempty"`
+	Raw          *string      `json:"raw,omitempty"`
 }
 
 type MessagePart struct {
@@ -42,7 +42,7 @@ type MessagePartBody struct {
 
 type SendMessageConfig struct {
 	UserId  string
-	Message Message
+	Message MimeMessage
 }
 
 func (service *Service) SendMessage(config *SendMessageConfig) (*Message, *errortools.Error) {
@@ -52,10 +52,14 @@ func (service *Service) SendMessage(config *SendMessageConfig) (*Message, *error
 
 	message := Message{}
 
+	raw := config.Message.Raw(true)
+
 	requestConfig := go_http.RequestConfig{
-		Method:        http.MethodGet,
-		Url:           service.url(fmt.Sprintf("users/%s/messages/send", config.UserId)),
-		BodyModel:     config.Message,
+		Method: http.MethodPost,
+		Url:    service.url(fmt.Sprintf("users/%s/messages/send", config.UserId)),
+		BodyModel: Message{
+			Raw: &raw,
+		},
 		ResponseModel: &message,
 	}
 	_, _, e := service.googleService.HttpRequest(&requestConfig)
